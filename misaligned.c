@@ -11,12 +11,13 @@ int printColorMap(void(*fp)(const char*)) {
     int i = 0, j = 0;
     for(i = 0; i < 5; i++) {
         for(j = 0; j < 5; j++) {
-            fp("%d | %s | %s\n", i * 5 + j, majorColor[i], minorColor[i]);
+            sprintf(manualItem,"%d | %s | %s\n", i * 5 + j, majorColor[i], minorColor[i]);
+            fp(manualItem);
         }
     }
     return i * j;
 }
-char actualManual;
+char actualManual[1024] = {0};
 void mockPrintOnConsole(const char* manualItem)
 {
     actualManual += manualItem;

@@ -40,7 +40,7 @@ int main() {
     //alertInCelcius(400.5, &testSystem);  // This should fail
     // Test environment using the mock
     alertInCelcius(303.6, &testSystem);  // This should fail
-    assert(received_celsius,)
+    assert(received_celsius)
     assert(testSystem.alertFailureCount == 2);  // Ensure two failures occurred
 
     // Change the function pointer to the real alert function

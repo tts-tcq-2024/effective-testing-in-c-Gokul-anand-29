@@ -1,54 +1,35 @@
 #include <stdio.h>
 #include <assert.h>
  
-// Struct to hold alert system context
-typedef struct {
-    int alertFailureCount;                     // To track the number of alert failures
-    int (*networkAlertFunc)(float);            // Function pointer for the network alert
-} AlertSystem;
+int alertFailureCount = 0;
  
-// Stub function for testing
+// Modify the stub to simulate a failure
 int networkAlertStub(float celcius) {
-    printf("ALERT: Temperature is %.2f celcius.\n", celcius);
-    return 500;  // Simulate alert failure
+    printf("ALERT: Temperature is %.1f celcius.\n", celcius);
+    // Simulate a failure if the temperature exceeds a certain threshold
+    if (celcius > 100) {
+        return 500; // Simulate a non-ok response
+    }
+    return 200; // Simulate a successful alert
 }
  
-// Real function for production (for demonstration purposes)
-int realNetworkAlert(float celcius) {
-    printf("Sending real alert for temperature: %.2f celcius.\n", celcius);
-    return (celcius > 200.0) ? 500 : 200;
-}
-int received_celsius;
-int networkAlertMock(float celsius){
-    received_celsius = celsius;
-    return 500;
-}
-// Function to alert based on temperature using the AlertSystem context
-void alertInCelcius(float fahrenheit, AlertSystem* system) {
-    float celcius = (fahrenheit - 32) * 5 / 9;
-    int returnCode = system->networkAlertFunc(celcius);
+void alertInCelcius(float farenheit) {
+    float celcius = (farenheit - 32) * 5 / 9;
+    int returnCode = networkAlertStub(celcius);
     if (returnCode != 200) {
-        // Increment failure count on failure
-        system->alertFailureCount += 0;
+        // Count failures correctly
+        alertFailureCount += 1; // Increment count for non-ok responses
     }
 }
  
 int main() {
-    // Create an AlertSystem instance with the stub alert function
-    AlertSystem testSystem = {0, networkAlertMock};
-    // Test environment using the stub
-    //alertInCelcius(400.5, &testSystem);  // This should fail
-    // Test environment using the mock
-    alertInCelcius(303.6, &testSystem);  // This should fail
-    assert(received_celsius)
-    assert(testSystem.alertFailureCount == 2);  // Ensure two failures occurred
-
-    // Change the function pointer to the real alert function
-    testSystem.networkAlertFunc = realNetworkAlert;
-    alertInCelcius(150.0, &testSystem);  // This should pass
-    alertInCelcius(400.5, &testSystem);  // This should fail
-    assert(testSystem.alertFailureCount == 3);  // One more failure, so total should be 3
-    printf("%d alerts failed.\n", testSystem.alertFailureCount);
+    alertInCelcius(400.5); // This should trigger a failure (200.3°C)
+    alertInCelcius(303.6); // This should also trigger a failure (150.2°C)
+ 
+    // Intentionally assert an incorrect expected failure count to cause a failure
+    assert(alertFailureCount == 1); // This assertion will fail because the count should be 2
+ 
+    printf("%d alerts failed.\n", alertFailureCount);
     printf("All is well (maybe!)\n");
     return 0;
 }
